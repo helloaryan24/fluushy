@@ -111,7 +111,7 @@ class TextStyles {
       color: AppColors.whitecolor);
 
   static const TextStyle Montserratbold4 = TextStyle(
-      fontSize: 8.0,
+      fontSize: 10.0,
       fontFamily: 'Montserratbold',
       color: AppColors.blackcolor);
 

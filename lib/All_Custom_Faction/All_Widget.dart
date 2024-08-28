@@ -304,7 +304,7 @@ Widget buildInputField({
         prefixIcon: Icon(Icons.search_rounded),
         prefixIconColor: AppColors.whitecolor,
         hintText: hintText,
-        hintStyle: TextStyles.MontserratRegular6,
+        hintStyle: TextStyles.MontserratMedium3,
         contentPadding: EdgeInsets.zero,
         focusColor: AppColors.buttoncolor,
         focusedBorder: OutlineInputBorder(

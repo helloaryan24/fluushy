@@ -134,6 +134,7 @@ class HomePageController extends GetxController {
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               hotel['name'],
@@ -145,6 +146,35 @@ class HomePageController extends GetxController {
               fit: BoxFit.cover,
               height: 200,
               width: double.infinity,
+            ),
+            SizedBox(height: 10),
+            Text(
+              'Rating: 4.5', // Replace with dynamic rating if available
+              style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+            ),
+            SizedBox(height: 10),
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      // Implement the directions functionality here
+                      print('Directions to ${hotel['name']}');
+                    },
+                    child: Text('Get Directions'),
+                  ),
+                ),
+                SizedBox(width: 10),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      // Implement more functionality here
+                      print('More information about ${hotel['name']}');
+                    },
+                    child: Text('More Info'),
+                  ),
+                ),
+              ],
             ),
           ],
         ),

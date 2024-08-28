@@ -37,8 +37,10 @@ class ToiletsDetails_Screen extends StatelessWidget {
     );
   }
 
-  Widget _buildActionIcon(
-      {required IconData icon, required VoidCallback onTap}) {
+  Widget _buildActionIcon({
+    required IconData icon,
+    required VoidCallback onTap,
+  }) {
     return ClipOval(
       child: Material(
         color: AppColors.whitecolor1,
@@ -51,6 +53,30 @@ class ToiletsDetails_Screen extends StatelessWidget {
             child: Icon(
               icon,
               size: 20,
+              color: AppColors.contcolor1,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSocialIcon({
+    required IconData icon,
+    required VoidCallback onTap,
+    required double size,
+  }) {
+    return ClipOval(
+      child: Material(
+        color: AppColors.whitecolor,
+        child: InkWell(
+          onTap: onTap,
+          child: SizedBox(
+            width: size,
+            height: size,
+            child: Icon(
+              icon,
+              size: size * 0.6,
               color: AppColors.contcolor1,
             ),
           ),
@@ -117,7 +143,7 @@ class ToiletsDetails_Screen extends StatelessWidget {
                                           child: Container(
                                             child: Padding(
                                               padding:
-                                                  const EdgeInsets.all(1.0),
+                                              const EdgeInsets.all(1.0),
                                               child: Icon(
                                                 Icons.verified,
                                                 color: Colors.blue,
@@ -149,7 +175,7 @@ class ToiletsDetails_Screen extends StatelessWidget {
                                   SizedBox(width: 20),
                                   Column(
                                     crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                                    CrossAxisAlignment.start,
                                     children: [
                                       Text("John Doe",
                                           style: TextStyles.MontserratMedium),
@@ -210,7 +236,7 @@ class ToiletsDetails_Screen extends StatelessWidget {
                                       padding: EdgeInsets.all(1),
                                       child: Row(
                                         mainAxisAlignment:
-                                            MainAxisAlignment.center,
+                                        MainAxisAlignment.center,
                                         children: [
                                           Icon(
                                             Icons.star,
@@ -239,10 +265,10 @@ class ToiletsDetails_Screen extends StatelessWidget {
                                   ),
                                 ],
                               ),
-                              SizedBox(height: 10),
+                              SizedBox(height: 20),
                               Text('Opening hours',
                                   style: TextStyles.MontserratSemibold6),
-                              SizedBox(height: 5),
+                              SizedBox(height: 10),
                               Container(
                                 width: 140,
                                 decoration: BoxDecoration(
@@ -262,19 +288,19 @@ class ToiletsDetails_Screen extends StatelessWidget {
                               SizedBox(height: 10),
                               Text('Facilities for',
                                   style: TextStyles.MontserratSemibold6),
-                              SizedBox(height: 5),
+                              SizedBox(height: 10),
                               Obx(() {
                                 return Wrap(
                                   spacing: 1,
                                   children:
-                                      controller.facilities.map((facility) {
+                                  controller.facilities.map((facility) {
                                     return Padding(
                                       padding:
-                                          EdgeInsets.all(screenWidth * 0.005),
+                                      EdgeInsets.all(screenWidth * 0.005),
                                       child: _buildFacilityBadge(
                                         facility: facility,
                                         icon:
-                                            controller.facilityIcons[facility]!,
+                                        controller.facilityIcons[facility]!,
                                         screenWidth: screenWidth,
                                         screenHeight: screenHeight,
                                       ),
@@ -296,55 +322,83 @@ class ToiletsDetails_Screen extends StatelessWidget {
                       SizedBox(height: 20),
                       Text("Ratings & Reviews",
                           style: TextStyles.Montserratbold2),
+                      SizedBox(height: 5),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          FlutterRating(
+                            rating: 4.5,
+                            starCount: 5,
+
+                            // rating: stars != null && starLength > 5
+                            //     ? 4.0
+                            //     : (stars ?? 0).toDouble(),
+                            size: 18,
+                            borderColor: Colors.black38,
+                          ),
+                          SizedBox(width: 5),
+                          Text("4.5", style: TextStyles.MontserratMedium5),
+                          SizedBox(width: 5),
+                          Text("(120)", style: TextStyles.MontserratMedium5),
+                        ],
+                      ),
                       SizedBox(height: 10),
-                      Container(
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(5),
-                          color: AppColors.contcolor1.withOpacity(0.6),
+                      ElevatedButton(
+                        onPressed: () {
+                          // Action to write a review
+                          Get.toNamed('/write-review');
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.contcolor1, // Button color
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
                         ),
                         child: Padding(
-                          padding: const EdgeInsets.all(10.0),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  FlutterRating(
-                                    rating: 3,
-                                    // rating: stars != null && starLength > 5
-                                    //     ? 4.0
-                                    //     : (stars ?? 0).toDouble(),
-                                    size: 18,
-                                    borderColor: Colors.black38,
-                                  ),
-                                  SizedBox(width: 10,),
-                                  Padding(
-                                    padding: const EdgeInsets.only(top: 1),
-                                    child: Text("4.5 out of 5",
-                                        style: TextStyles.MontserratMedium3),
-                                  ),
-
-                                ],
-                              ),
-                              SizedBox(height: 10,),
-                              Text('Share details of your experience with this Toilet',
-                                  style: TextStyles.MontserratSemibold6),
-                              SizedBox(height: 10,),
-                              SizedBox(height: 30,
-                                child: CustomButton4(
-                                  style: TextStyles.Montserratbold1,
-                                  backgroundColor: AppColors.contcolor1,
-                                  onTap: () {},
-                                  text: "Write a review",
-                                ),
-                              ),
-                            ],
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 30, vertical: 10),
+                          child: Text(
+                            'Write a Review',
+                            style: TextStyle(
+                                color: AppColors.whitecolor,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w400),
                           ),
                         ),
                       ),
+
+                      SizedBox(height: 10),
+                      // Social Buttons (like, share, save)
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          _buildSocialIcon(
+                            icon: Icons.favorite_border,
+                            onTap: () {
+                              // Implement like functionality here
+                            },
+                            size: screenWidth * 0.1,
+                          ),
+                          _buildSocialIcon(
+                            icon: Icons.share,
+                            onTap: () {
+                              // Implement share functionality here
+                            },
+                            size: screenWidth * 0.1,
+                          ),
+                          _buildSocialIcon(
+                            icon: Icons.bookmark_border,
+                            onTap: () {
+                              // Implement save functionality here
+                            },
+                            size: screenWidth * 0.1,
+                          ),
+                        ],
+                      ),
                       SizedBox(height: 20),
+                      Text("Facilities", style: TextStyles.Montserratbold2),
+                      SizedBox(height: 5),
+                      // Additional content goes here...
                     ],
                   ),
                 ),

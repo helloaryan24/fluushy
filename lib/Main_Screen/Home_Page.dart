@@ -69,18 +69,20 @@ class HomePage_Screen extends StatelessWidget {
                           ),
                         ),
                         ...controller.nearbyHotels
-                            .map((hotel) => Marker(
-                                  markerId: MarkerId(hotel['name'] as String),
-                                  position: hotel['location'] as LatLng,
-                                  icon: controller.customIcon.value ??
-                                      BitmapDescriptor.defaultMarker,
-                                  draggable: true,
-                                  flat: true,
-                                  visible: true,
-
-                                ))
-                            .toSet(),
-                      },
+                        .map((hotel) => Marker(
+                    markerId: MarkerId(hotel['name'] as String),
+                    position: hotel['location'] as LatLng,
+                    icon: controller.customIcon.value ?? BitmapDescriptor.defaultMarker,
+                    infoWindow: InfoWindow(
+                    title: hotel['name'], // This will show a small popup on marker click
+                    ),
+                    onTap: () {
+                    // When the marker is tapped, show the bottom sheet
+                    controller.onMarkerTapped(hotel);
+                    },
+                    ))
+                        .toSet()
+                    },
                       onMapCreated: (GoogleMapController gMapController) {
                         controller.mapController.value = gMapController;
                       },
