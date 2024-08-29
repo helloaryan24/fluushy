@@ -13,44 +13,50 @@ class HomePage_Screen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final HomePageController controller = Get.put(HomePageController());
-    controller.locateMe();
+
     return SafeArea(
       child: Scaffold(
         backgroundColor: AppColors.whitecolor,
         body: LayoutBuilder(
           builder: (context, constraints) {
-            return Column(
-              children: [
-                SizedBox(height: 20),
-                Text(
-                  "FLUUSHY",
-                  style: TextStyles.Montserratbold9,
-                ),
-                SizedBox(height: 10),
-                Image.asset(Images.logo, fit: BoxFit.fill, width: 200),
-                SizedBox(height: 10),
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
-                  child: Container(
-                    height: 50,
-                    decoration: BoxDecoration(
-                      color: AppColors.contcolor1,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: buildInputField(
-                      hintText: "Search toilets & amenities",
-                      controller: controller.searchController.value,
-                      keyboardType: TextInputType.name,
-                      onChanged: (query) {
-                        controller.searchLocation(query);
-                      },
+            return Obx(() {
+              if (!controller.mapInitialized.value) {
+                return Center(
+                  child: CircularProgressIndicator(),
+                );
+              }
+
+              return Column(
+                children: [
+                  SizedBox(height: 20),
+                  Text(
+                    "FLUUSHY",
+                    style: TextStyles.Montserratbold9,
+                  ),
+                  SizedBox(height: 10),
+                  Image.asset(Images.logo, fit: BoxFit.fill, width: 200),
+                  SizedBox(height: 10),
+                  Padding(
+                    padding:
+                    const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
+                    child: Container(
+                      height: 50,
+                      decoration: BoxDecoration(
+                        color: AppColors.contcolor1,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: buildInputField(
+                        hintText: "Search toilets & amenities",
+                        controller: controller.searchController.value,
+                        keyboardType: TextInputType.name,
+                        onChanged: (query) {
+                          controller.searchLocation(query);
+                        },
+                      ),
                     ),
                   ),
-                ),
-                Expanded(
-                  child: Obx(() {
-                    return GoogleMap(
+                  Expanded(
+                    child: GoogleMap(
                       initialCameraPosition: CameraPosition(
                         target: controller.currentLocation.value,
                         zoom: 15,
@@ -68,29 +74,30 @@ class HomePage_Screen extends StatelessWidget {
                             title: controller.locationName.value,
                           ),
                         ),
-                        ...controller.nearbyHotels
-                        .map((hotel) => Marker(
-                    markerId: MarkerId(hotel['name'] as String),
-                    position: hotel['location'] as LatLng,
-                    icon: controller.customIcon.value ?? BitmapDescriptor.defaultMarker,
-                    infoWindow: InfoWindow(
-                    title: hotel['name'], // This will show a small popup on marker click
-                    ),
-                    onTap: () {
-                    // When the marker is tapped, show the bottom sheet
-                    controller.onMarkerTapped(hotel);
-                    },
-                    ))
-                        .toSet()
-                    },
+                        ...controller.nearbyHotels.map((hotel) {
+                          return Marker(
+                            markerId: MarkerId(hotel['name'] as String),
+                            position: hotel['location'] as LatLng,
+                            icon: controller.customIcon.value ??
+                                BitmapDescriptor.defaultMarker,
+                            infoWindow: InfoWindow(
+                              title: hotel['name'],
+                            ),
+                            onTap: () {
+                              controller.onMarkerTapped(hotel);
+                            },
+                          );
+                        }).toSet(),
+                      },
                       onMapCreated: (GoogleMapController gMapController) {
                         controller.mapController.value = gMapController;
+                        controller.mapInitialized.value = true; // Map is ready
                       },
-                    );
-                  }),
-                ),
-              ],
-            );
+                    ),
+                  ),
+                ],
+              );
+            });
           },
         ),
       ),

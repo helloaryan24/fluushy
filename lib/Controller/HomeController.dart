@@ -15,12 +15,14 @@ class HomePageController extends GetxController {
   var suggestions = <String>[].obs;
   RxBool showBottomSheet = false.obs;
   var customIcon = Rx<BitmapDescriptor?>(null);
+  var mapInitialized = false.obs;
 
   var nearbyHotels = <Map<String, dynamic>>[].obs;
 
   @override
   void onInit() {
     super.onInit();
+    locateMe();
     loadCustomMarker();
   }
 
@@ -58,6 +60,12 @@ class HomePageController extends GetxController {
 
       // Optionally update nearby hotels with new data
       updateNearbyHotels();
+
+      // Mark the map as initialized
+      mapInitialized.value = true;
+    } else {
+      // Handle location service disabled or permission denied
+      mapInitialized.value = false;
     }
   }
 
