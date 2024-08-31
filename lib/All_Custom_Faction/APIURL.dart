@@ -11,6 +11,7 @@ import 'Image.dart';
 
 class ApiUrls {
   static const String MainUrl = 'https://fluushy.devashishsoni.site/api/';
+  static const String googleapikey = 'AIzaSyBAsTmejAByMGzlH9qkGbXr-mva057vtGM';
   static const String signuprapiapi = '${MainUrl}signup';
   static const String loginapi = '${MainUrl}signin';
   static const String verifyotpapi = '${MainUrl}verify-otp';

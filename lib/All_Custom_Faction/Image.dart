@@ -5,6 +5,8 @@ class Images {
   static const String logo = 'assets/Images/fluushylogo.png';
   static const String googlelogo = 'assets/Images/googlelogo.png';
   static const String otplogo = 'assets/Images/otpimg.png';
+  static const String wclogo = 'assets/Images/wc_icon.png';
+  static const String personimg = 'assets/person.png';
   static const String fluushynamewithlogo = 'assets/Images/fluushyname.png';
   static const String loder = 'assets/loder.json';
   static const String error = 'assets/nOjR3ormmQ.json';

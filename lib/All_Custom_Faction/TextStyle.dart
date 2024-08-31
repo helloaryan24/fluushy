@@ -139,6 +139,11 @@ class TextStyles {
       fontFamily: 'Montserratbold',
       color: AppColors.greycolor);
 
+  static const TextStyle Montserratbold10 = TextStyle(
+      fontSize: 30.0,
+      fontFamily: 'Montserratbold',
+      color: AppColors.greycolor);
+
 
   static const TextStyle MontserratSemibold1 = TextStyle(
       fontSize: 10.0,
