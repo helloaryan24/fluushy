@@ -1,18 +1,24 @@
 import 'dart:async';
-import 'dart:math';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../All_Custom_Faction/APIURL.dart';
+import '../All_Custom_Faction/All_Widget.dart';
 import '../All_Custom_Faction/Image.dart';
 import '../All_Custom_Faction/Colors.dart';
+import 'package:http/http.dart' as http;
+
+import '../Model/Toiletmodel.dart';
+
+// Define a model class for Toilet
 
 class HomePageController extends GetxController {
   final searchController = TextEditingController().obs;
   final mapController = Rx<GoogleMapController?>(null);
-  final currentLocation = LatLng(0.0,0.0).obs;
+  final currentLocation = LatLng(0.0, 0.0).obs;
   final locationName = 'Current Location'.obs;
   final suggestions = <String>[].obs;
   final showBottomSheet = false.obs;
@@ -21,7 +27,6 @@ class HomePageController extends GetxController {
   final mapInitialized = false.obs;
   final selectedHotel = Rxn<Map<String, dynamic>>();
   final nearbyHotels = <Map<String, dynamic>>[].obs;
-
   LatLng? previousLocation;
   final markers = <Marker>{}.obs;
   final polylines = <Polyline>{}.obs;
@@ -29,14 +34,52 @@ class HomePageController extends GetxController {
   var distanceRemaining = 0.0.obs; // Make distanceRemaining reactive
   RxBool isButtonVisible = true.obs;
 
+  // Add the toiletList variable
+  final toiletList = <Toilet>[].obs;
+
   @override
   void onInit() {
     super.onInit();
     startLocationUpdates();
     loadCustomMarkers();
+    fetchToiletData();
   }
 
+  Future<void> fetchToiletData() async {
+    final url = ApiUrls.gettolietapi; // Your API URL
+    print('API URL: $url');
 
+    try {
+      // Perform API request
+      final response = await http.get(Uri.parse(url));
+      print('Response Status Code: ${response.statusCode}');
+      if (response.statusCode == 200) {
+        final responseJson = json.decode(response.body);
+        print('API Response: $responseJson');
+
+        // Check if the response has the 'data' key
+        if (responseJson.containsKey('data') && responseJson['data'] is List) {
+          final data = responseJson['data'] as List;
+
+          // Parse the data into a list of Toilet objects
+          toiletList.value = data.map((json) => Toilet.fromJson(json)).toList();
+          print("Data fetched successfully: ${toiletList.value}");
+        } else {
+          print('Invalid API response structure');
+          showErrorSnackbar('Failed to load data');
+        }
+      } else {
+        print('API Error: ${response.statusCode} ${response.reasonPhrase}');
+        showErrorSnackbar('Failed to load data');
+      }
+    } catch (e) {
+      showErrorSnackbar('An error occurred');
+      print('Exception: $e');
+    } finally {
+      // Hide loading indicator
+      Get.back();  // Remove this if Get.dialog() is not being used
+    }
+  }
 
   void loadCustomMarkers() async {
     customIcon.value = await _loadMarkerIcon('assets/wc_icon.png', 30);
@@ -47,12 +90,10 @@ class HomePageController extends GetxController {
     return BitmapDescriptor.fromAssetImage(
       ImageConfiguration(size: Size(size, size)),
       path,
-
     );
   }
 
   void startLocationUpdates() {
-
     Timer.periodic(Duration(seconds: 10), (_) => locateMe());
   }
 
@@ -80,10 +121,6 @@ class HomePageController extends GetxController {
   }
 
   void cancelNavigation() {
-    // navigationStarted.value = false;
-    // polylines.clear();
-    // update();
-
     navigationStarted.value = false;
 
     // Clear any polylines on the map

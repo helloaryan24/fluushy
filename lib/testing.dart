@@ -1,381 +1,350 @@
+// import 'dart:async';
+// import 'dart:convert';
+// import 'dart:math';
 // import 'package:flutter/material.dart';
+// import 'package:flutter_polyline_points/flutter_polyline_points.dart';
+// import 'package:geolocator/geolocator.dart';
 // import 'package:get/get.dart';
 // import 'package:google_maps_flutter/google_maps_flutter.dart';
-// import 'package:fluushy/All_Custom_Faction/Colors.dart';
+// import '../All_Custom_Faction/APIURL.dart';
 // import '../All_Custom_Faction/All_Widget.dart';
 // import '../All_Custom_Faction/Image.dart';
-// import '../All_Custom_Faction/TextStyle.dart';
-// import '../Controller/HomeController.dart';
-//
-// class HomePage_Screen extends StatelessWidget {
-//   const HomePage_Screen({super.key});
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     // Initialize the controller
-//     final HomePageController controller = Get.put(HomePageController());
-//
-//     return SafeArea(
-//       child: Scaffold(
-//         backgroundColor: AppColors.whitecolor,
-//         body: LayoutBuilder(
-//           builder: (context, constraints) {
-//             // Define the height of the GoogleMap based on the screen height
-//             double mapHeight = constraints.maxHeight * 0.6; // Adjust the multiplier as needed
-//
-//             return Column(
-//               children: [
-//                 SizedBox(height: 20),
-//                 Text(
-//                   "FLUUSHY",
-//                   style: TextStyles.Montserratbold9,
-//                 ),
-//                 SizedBox(height: 10), // Add spacing between text and image
-//                 Image.asset(Images.logo, fit: BoxFit.fill, width: 200),
-//                 SizedBox(height: 10), // Add spacing between image and input field
-//                 Padding(
-//                   padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
-//                   child: Container(
-//                     height: 50,
-//                     decoration: BoxDecoration(
-//                       color: AppColors.contcolor1,
-//                       borderRadius: BorderRadius.circular(8),
-//                     ),
-//                     child: buildInputField(
-//                       hintText: "Search toilets & amenities",
-//                       controller: controller.searchController.value,
-//                       keyboardType: TextInputType.name,
-//                       onChanged: (query) {
-//                         controller.searchLocation(query);
-//                       },
-//                     ),
-//                   ),
-//                 ),
-//                 Expanded(
-//                   child: Container(
-//                     width: double.infinity,
-//                     child: Obx(() {
-//                       final customIcon = controller.customIcon.value;
-//
-//                       return GoogleMap(
-//                         initialCameraPosition: CameraPosition(
-//                           target: controller.currentLocation.value,
-//                           zoom: 15,
-//                         ),
-//                         myLocationEnabled: true,
-//                         myLocationButtonEnabled: false,
-//                         zoomControlsEnabled: true,
-//                         markers: {
-//                           Marker(
-//                             markerId: MarkerId('currentLocation'),
-//                             position: controller.currentLocation.value,
-//                             icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
-//                             infoWindow: InfoWindow(
-//                               title: controller.locationName.value,
-//                             ),
-//                           ),
-//                           ...controller.nearbyHotels.map((hotel) => Marker(
-//                             markerId: MarkerId(hotel['name'] as String), // Cast 'name' to String
-//                             position: hotel['location'] as LatLng, // Cast 'location' to LatLng
-//                             icon: customIcon!, // Use the custom home icon
-//                             infoWindow: InfoWindow(
-//                               title: hotel['name'] as String, // Cast 'name' to String
-//                             ),
-//                           )).toSet(),
-//                         },
-//                         onMapCreated: (GoogleMapController gMapController) {
-//                           controller.mapController.value = gMapController;
-//                         },
-//                       );
-//                     }),
-//                   ),
-//                 ),
-//               ],
-//             );
-//           },
-//         ),
-//       ),
-//     );
-//   }
-// }
-// ====================================
-
-//
-// import 'package:flutter/cupertino.dart';
-// import 'package:get/get_rx/src/rx_types/rx_types.dart';
-// import 'package:get/get_state_manager/src/simple/get_controllers.dart';
-// import 'package:google_maps_flutter/google_maps_flutter.dart';
+// import '../All_Custom_Faction/Colors.dart';
+// import 'package:http/http.dart' as http;
 //
 // class HomePageController extends GetxController {
-//   var searchController = TextEditingController().obs;
-//   var mapController = Rx<GoogleMapController?>(null);
-//   var currentLocation = LatLng(26.864608, 75.764692).obs;
-//   var locationName = 'Current Location'.obs;
-//   var suggestions = <String>[].obs;
-//   RxBool showBottomSheet = false.obs;
-//   var customIcon = Rx<BitmapDescriptor?>(null); // Add this line
-//
-//   // List of nearby hotels
-//   var nearbyHotels = [
-//     {
-//       'name': 'toilets A',
-//       'location': LatLng(26.865608, 75.764692),
-//     },
-//     {
-//       'name': 'toilets B',
-//       'location': LatLng(26.864908, 75.764892),
-//     },
-//     {
-//       'name': 'toilets C',
-//       'location': LatLng(26.864408, 75.764292),
-//     },
-//
-//     {
-//       'name': 'toilets d',
-//       'location': LatLng(26.864408, 75.764292),
-//     },
-//     {
-//       'name': 'toilets E',
-//       'location': LatLng(26.864408, 75.764292),
-//     },
-//     {
-//       'name': 'toilets F',
-//       'location': LatLng(26.864408, 75.764292),
-//     },
-//   ].obs;
-//
-//   void updateLocation(LatLng newLocation, [String? name]) {
-//     currentLocation.value = newLocation;
-//     if (name != null) {
-//       locationName.value = name;
-//     }
-//     mapController.value?.animateCamera(
-//       CameraUpdate.newLatLng(newLocation),
-//     );
-//   }
-//
-//   void toggleBottomSheet() {
-//     showBottomSheet.value = !showBottomSheet.value;
-//   }
-//
-//   void searchLocation(String query) {
-//     LatLng searchedLocation = LatLng(26.864608, 75.764692); // Placeholder value
-//     updateLocation(searchedLocation, 'Searched Location');
-//   }
-//
-//   Future<String?> getPlaceId(String address) async {
-//     return 'PLACE_ID';
-//   }
-//
-//   void selectLocation(String placeId) {
-//     LatLng selectedLocation = LatLng(26.864608, 75.764692); // Placeholder value
-//     updateLocation(selectedLocation, 'Selected Location');
-//     searchController.value.clear();
-//     suggestions.clear();
-//   }
+//   final searchController = TextEditingController().obs;
+//   final mapController = Rx<GoogleMapController?>(null);
+//   final currentLocation = LatLng(0.0,0.0).obs;
+//   final locationName = 'Current Location'.obs;
+//   final suggestions = <String>[].obs;
+//   final showBottomSheet = false.obs;
+//   final customIcon = Rx<BitmapDescriptor?>(null);
+//   final customIcon1 = Rx<BitmapDescriptor?>(null);
+//   final mapInitialized = false.obs;
+//   final selectedHotel = Rxn<Map<String, dynamic>>();
+//   final nearbyHotels = <Map<String, dynamic>>[].obs;
+//   LatLng? previousLocation;
+//   final markers = <Marker>{}.obs;
+//   final polylines = <Polyline>{}.obs;
+//   final navigationStarted = RxBool(false);
+//   var distanceRemaining = 0.0.obs; // Make distanceRemaining reactive
+//   RxBool isButtonVisible = true.obs;
 //
 //   @override
 //   void onInit() {
 //     super.onInit();
-//     loadCustomMarker();
+//     startLocationUpdates();
+//     loadCustomMarkers();
+//     fetchToiletData();
 //   }
 //
-//   void loadCustomMarker() async {
-//     final icon = await BitmapDescriptor.fromAssetImage(
-//       ImageConfiguration(size: Size(50, 50)),
-//       'assets/wc_icon.png',
-//     );
-//     customIcon.value = icon;
-//   }
-// }
-
-
-
-//Home page
-//==================
-// import 'package:flutter/material.dart';
-// import 'package:get/get.dart';
-// import 'package:google_maps_flutter/google_maps_flutter.dart';
-// import 'package:fluushy/All_Custom_Faction/Colors.dart';
-// import '../All_Custom_Faction/All_Widget.dart';
-// import '../All_Custom_Faction/Image.dart';
-// import '../All_Custom_Faction/TextStyle.dart';
-// import '../Controller/HomeController.dart';
 //
-// class HomePage_Screen extends StatelessWidget {
-//   const HomePage_Screen({super.key});
+//   Future<void> fetchToiletData() async {
+//     final url = ApiUrls.gettolietapi; // Your API URL
+//     print('API URL: $url');
 //
-//   @override
-//   Widget build(BuildContext context) {
-//     // Initialize the controller
-//     final HomePageController controller = Get.put(HomePageController());
+//     // Show loading indicator (Optional, can remove for testing)
+//     // Get.dialog(
+//     //   Center(child: CircularProgressIndicator()),
+//     //   barrierDismissible: false,
+//     // );
 //
-//     return SafeArea(
-//       child: Scaffold(
-//         backgroundColor: AppColors.whitecolor,
-//         body: LayoutBuilder(
-//           builder: (context, constraints) {
-//             // Define the height of the GoogleMap based on the screen height
-//             double mapHeight = constraints.maxHeight * 0.6; // Adjust the multiplier as needed
-//
-//             return Column(
-//               children: [
-//                 SizedBox(height: 20),
-//                 Text(
-//                   "FLUUSHY",
-//                   style: TextStyles.Montserratbold9,
-//                 ),
-//                 SizedBox(height: 10), // Add spacing between text and image
-//                 Image.asset(Images.logo, fit: BoxFit.fill, width: 200),
-//                 SizedBox(height: 10), // Add spacing between image and input field
-//                 Padding(
-//                   padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
-//                   child: Container(
-//                     height: 50,
-//                     decoration: BoxDecoration(
-//                       color: AppColors.contcolor1,
-//                       borderRadius: BorderRadius.circular(8),
-//                     ),
-//                     child: buildInputField(
-//                       hintText: "Search toilets & amenities",
-//                       controller: controller.searchController.value,
-//                       keyboardType: TextInputType.name,
-//                       onChanged: (query) {
-//                         controller.searchLocation(query);
-//                       },
-//                     ),
-//                   ),
-//                 ),
-//                 Expanded(
-//                   child: Container(
-//                     width: double.infinity,
-//                     child: Obx(() {
-//                       final customIcon = controller.customIcon.value;
-//
-//                       return GoogleMap(
-//                         initialCameraPosition: CameraPosition(
-//                           target: controller.currentLocation.value,
-//                           zoom: 15,
-//                         ),
-//                         myLocationEnabled: true,
-//                         myLocationButtonEnabled: false,
-//                         zoomControlsEnabled: true,
-//                         markers: {
-//                           Marker(
-//                             markerId: MarkerId('currentLocation'),
-//                             position: controller.currentLocation.value,
-//                             icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
-//                             infoWindow: InfoWindow(
-//                               title: controller.locationName.value,
-//                             ),
-//                           ),
-//                           ...controller.nearbyHotels.map((hotel) => Marker(
-//                             markerId: MarkerId(hotel['name'] as String), // Cast 'name' to String
-//                             position: hotel['location'] as LatLng, // Cast 'location' to LatLng
-//                             icon: customIcon!, // Use the custom home icon
-//                             infoWindow: InfoWindow(
-//                               title: hotel['name'] as String, // Cast 'name' to String
-//                             ),
-//                           )).toSet(),
-//                         },
-//                         onMapCreated: (GoogleMapController gMapController) {
-//                           controller.mapController.value = gMapController;
-//                         },
-//                       );
-//                     }),
-//                   ),
-//                 ),
-//               ],
-//             );
-//           },
-//         ),
-//       ),
-//     );
-//   }
-// }
-// import 'package:flutter/cupertino.dart';
-// import 'package:get/get_rx/src/rx_types/rx_types.dart';
-// import 'package:get/get_state_manager/src/simple/get_controllers.dart';
-// import 'package:google_maps_flutter/google_maps_flutter.dart';
-//
-// class HomePageController extends GetxController {
-//   var searchController = TextEditingController().obs;
-//   var mapController = Rx<GoogleMapController?>(null);
-//   var currentLocation = LatLng(26.864608, 75.764692).obs;
-//   var locationName = 'Current Location'.obs;
-//   var suggestions = <String>[].obs;
-//   RxBool showBottomSheet = false.obs;
-//   var customIcon = Rx<BitmapDescriptor?>(null); // Add this line
-//
-//   // List of nearby hotels
-//   var nearbyHotels = [
-//     {
-//       'name': 'toilets A',
-//       'location': LatLng(26.865608, 75.764691),
-//     },
-//     {
-//       'name': 'toilets B',
-//       'location': LatLng(26.864908, 75.764890),
-//     },
-//     {
-//       'name': 'toilets C',
-//       'location': LatLng(26.864408, 75.764210),
-//     },
-//     {
-//       'name': 'toilets d',
-//       'location': LatLng(26.864408, 75.764294),
-//     },
-//     {
-//       'name': 'toilets E',
-//       'location': LatLng(26.864408, 75.764295),
-//     },
-//     {
-//       'name': 'toilets F',
-//       'location': LatLng(26.864408, 75.764293),
-//     },
-//   ].obs;
-//
-//   void updateLocation(LatLng newLocation, [String? name]) {
-//     currentLocation.value = newLocation;
-//     if (name != null) {
-//       locationName.value = name;
+//     try {
+//       // Perform API request
+//       final response = await http.get(Uri.parse(url));
+//       print('Response Status Code: ${response.statusCode}');
+//       if (response.statusCode == 200) {
+//         final data = json.decode(response.body);
+//         print('API Response: $data');
+//       } else {
+//         print('API Error: ${response.statusCode} ${response.reasonPhrase}');
+//         showErrorSnackbar('Failed to load data');
+//       }
+//     } catch (e) {
+//       showErrorSnackbar('An error occurred');
+//       print('Exception: $e');
+//     } finally {
+//       // Hide loading indicator
+//       Get.back();  // Remove this if Get.dialog() is not being used
 //     }
-//     mapController.value?.animateCamera(
-//       CameraUpdate.newLatLng(newLocation),
+//   }
+//   void loadCustomMarkers() async {
+//     customIcon.value = await _loadMarkerIcon('assets/wc_icon.png', 30);
+//     customIcon1.value = await _loadMarkerIcon(Images.personimg, 20);
+//   }
+//
+//
+//   Future<BitmapDescriptor> _loadMarkerIcon(String path, double size) {
+//     return BitmapDescriptor.fromAssetImage(
+//       ImageConfiguration(size: Size(size, size)),
+//       path,
+//
 //     );
 //   }
 //
-//   void toggleBottomSheet() {
-//     showBottomSheet.value = !showBottomSheet.value;
+//   void startLocationUpdates() {
+//
+//     Timer.periodic(Duration(seconds: 10), (_) => locateMe());
 //   }
+//
+//   Future<List<LatLng>> getPolylinePoints(LatLng start, LatLng end) async {
+//     try {
+//       PolylineResult result = await PolylinePoints().getRouteBetweenCoordinates(
+//         googleApiKey: ApiUrls.googleapikey,
+//         request: PolylineRequest(
+//           origin: PointLatLng(start.latitude, start.longitude),
+//           destination: PointLatLng(end.latitude, end.longitude),
+//           mode: TravelMode.driving,
+//         ),
+//       );
+//
+//       if (result.status == 'OK') {
+//         return result.points.map((e) => LatLng(e.latitude, e.longitude)).toList();
+//       } else {
+//         print('Error getting polyline points: ${result.errorMessage}');
+//         return [];
+//       }
+//     } catch (e) {
+//       print('Exception while getting polyline points: $e');
+//       return [];
+//     }
+//   }
+//
+//   void cancelNavigation() {
+//
+//     navigationStarted.value = false;
+//
+//     // Clear any polylines on the map
+//     polylines.clear();
+//
+//     // Reset the distance remaining
+//     distanceRemaining.value = 0.0;
+//
+//     // Optionally, clear selected hotel or other state
+//     selectedHotel.value = null;
+//
+//     // Optionally, reset the map view or stop further actions related to navigation
+//     // You can also remove any other markers or routes related to navigation
+//     mapController.value?.moveCamera(CameraUpdate.newLatLng(currentLocation.value));
+//
+//     Get.snackbar(
+//       "Navigation Cancelled",
+//       "The navigation has been cancelled.",
+//       backgroundColor: AppColors.gradientcolor1,
+//       colorText: Colors.white,
+//       snackPosition: SnackPosition.TOP,
+//       duration: Duration(seconds: 5),
+//     );
+//   }
+//
+//   void addPolyline(LatLng start, LatLng end) async {
+//     // polylines.clear();
+//     print("HELLO!");
+//     navigationStarted.value = true;
+//     List<LatLng> polylinePoints = await getPolylinePoints(start, end);
+//     polylines.add(Polyline(
+//       polylineId: PolylineId('polyline_${start.latitude}_${start.longitude}'),
+//       color: Colors.blue,
+//       width: 5,
+//       points: polylinePoints,
+//       startCap: Cap.roundCap,
+//       endCap: Cap.squareCap,
+//     ));
+//     distanceRemaining.value = calculateDistance(end); // Update distanceRemaining reactively
+//     update();
+//     Future.delayed(Duration(seconds: 5), () => showEndpointPopup(end));
+//   }
+//
+//   void showEndpointPopup(LatLng location) {
+//     if (selectedHotel.value != null) {
+//       Get.dialog(
+//         AlertDialog(
+//           shape: RoundedRectangleBorder(
+//             borderRadius: BorderRadius.circular(16),
+//           ),
+//           contentPadding: EdgeInsets.all(16),
+//           titlePadding: EdgeInsets.symmetric(vertical: 12),
+//           title: Text(
+//             selectedHotel.value!['name'],
+//             style: TextStyle(
+//               fontSize: 20,
+//               fontWeight: FontWeight.bold,
+//               color: Colors.black,
+//             ),
+//           ),
+//           content: Column(
+//             mainAxisSize: MainAxisSize.min,
+//             crossAxisAlignment: CrossAxisAlignment.center,
+//             children: [
+//               ClipRRect(
+//                 borderRadius: BorderRadius.circular(10),
+//                 child: Image.asset(
+//                   selectedHotel.value!['image'],
+//                   height: 150,
+//                   width: 150,
+//                   fit: BoxFit.cover,
+//                 ),
+//               ),
+//               SizedBox(height: 15),
+//               Text(
+//                 "You have reached your destination.",
+//                 style: TextStyle(
+//                   fontSize: 16,
+//                   color: Colors.grey[800],
+//                 ),
+//                 textAlign: TextAlign.center,
+//               ),
+//             ],
+//           ),
+//           actions: [
+//             TextButton(
+//               onPressed: () => Get.back(),
+//               child: Text(
+//                 "Close",
+//                 style: TextStyle(
+//                   fontSize: 16,
+//                   color: AppColors.contcolor1, // Customize the color if needed
+//                 ),
+//               ),
+//             ),
+//           ],
+//         ),
+//       );
+//     }
+//   }
+//
+//   void showCancelNavigationDialog() {
+//     if (navigationStarted.value) {
+//       Get.dialog(
+//         AlertDialog(
+//           title: Text("Cancel Navigation"),
+//           content: Text("Do you want to cancel the navigation?"),
+//           actions: [
+//             TextButton(
+//               onPressed: () {
+//                 cancelNavigation();
+//                 Get.back();
+//               },
+//               child: Text("Yes"),
+//             ),
+//             TextButton(
+//               onPressed: () => Get.back(),
+//               child: Text("No"),
+//             ),
+//           ],
+//         ),
+//       );
+//     }
+//   }
+//
+//   Future<void> locateMe() async {
+//     if (await _isLocationServiceEnabled() && await _checkPermissions()) {
+//       Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+//       LatLng newLocation = LatLng(position.latitude, position.longitude);
+//       if (previousLocation != null && selectedHotel.value != null) {
+//         addPolyline(previousLocation!, newLocation);
+//       }
+//       updateLocation(newLocation, 'Live Location');
+//       previousLocation = newLocation;
+//       updateNearbyHotels();
+//     } else {
+//       mapInitialized.value = false;
+//     }
+//   }
+//
+//   Future<bool> _isLocationServiceEnabled() async => await Geolocator.isLocationServiceEnabled();
+//   Future<bool> _checkPermissions() async {
+//     LocationPermission permission = await Geolocator.checkPermission();
+//     if (permission == LocationPermission.denied) permission = await Geolocator.requestPermission();
+//     return permission != LocationPermission.denied && permission != LocationPermission.deniedForever;
+//   }
+//
+//   void updateLocation(LatLng newLocation, String? name) {
+//     currentLocation.value = newLocation;
+//     locationName.value = name ?? locationName.value;
+//     mapController.value?.animateCamera(CameraUpdate.newLatLng(newLocation));
+//     if (customIcon.value != null) {
+//       markers.add(Marker(
+//         markerId: MarkerId("current_location"),
+//         position: newLocation,
+//         icon: customIcon.value!,
+//         infoWindow: InfoWindow(title: name ?? "Your Location"),
+//       ));
+//       update();
+//     }
+//   }
+//
+//   void updateNearbyHotels() {
+//     nearbyHotels.value = [
+//       {'name': 'OYO', 'location': LatLng(26.8396903,75.7726729), 'image': Images.googlelogo},
+//     ];
+//     updateMarkersForNearbyHotels();
+//   }
+//
+//   void updateMarkersForNearbyHotels() {
+//     markers.removeWhere((marker) => marker.markerId.value != "current_location");
+//     for (var hotel in nearbyHotels) {
+//       markers.add(Marker(
+//         markerId: MarkerId(hotel['name']),
+//         position: hotel['location'],
+//         icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
+//         infoWindow: InfoWindow(
+//           title: hotel['name'],
+//           snippet: "${calculateDistance(hotel['location']).toStringAsFixed(2)} km away",
+//         ),
+//         onTap: () => onMarkerTapped(hotel),
+//       ));
+//     }
+//     update();
+//   }
+//
+//   double calculateDistance(LatLng location) {
+//     return Geolocator.distanceBetween(
+//       currentLocation.value.latitude,
+//       currentLocation.value.longitude,
+//       location.latitude,
+//       location.longitude,
+//     ) / 1000;
+//   }
+//
+//   void onMarkerTapped(Map<String, dynamic> hotel) {
+//     selectedHotel.value = hotel;
+//   }
+//
+//   void toggleBottomSheet() => showBottomSheet.value = !showBottomSheet.value;
 //
 //   void searchLocation(String query) {
-//     LatLng searchedLocation = LatLng(26.864608, 75.764692); // Placeholder value
-//     updateLocation(searchedLocation, 'Searched Location');
-//   }
-//
-//   Future<String?> getPlaceId(String address) async {
-//     return 'PLACE_ID';
-//   }
-//
-//   void selectLocation(String placeId) {
-//     LatLng selectedLocation = LatLng(26.864608, 75.764692); // Placeholder value
-//     updateLocation(selectedLocation, 'Selected Location');
-//     searchController.value.clear();
-//     suggestions.clear();
-//   }
-//
-//   @override
-//   void onInit() {
-//     super.onInit();
-//     loadCustomMarker();
-//   }
-//
-//   void loadCustomMarker() async {
-//     final icon = await BitmapDescriptor.fromAssetImage(
-//       ImageConfiguration(size: Size(50, 50)),
-//       'assets/wc_icon.png',
-//     );
-//     customIcon.value = icon;
+//     updateLocation(LatLng(26.864608, 75.764692), 'Searched Location');
 //   }
 // }
+//
+//
+// // Future<void> fetchToiletData() async {
+// //   final url = ApiUrls.gettolietapi; // Your API URL
+// //   print('API URL: $url');
+// //
+// //
+// //   try {
+// //     // Perform API request
+// //     final response = await http.get(Uri.parse(url));
+// //     print('Response Status Code: ${response.statusCode}');
+// //     if (response.statusCode == 200) {
+// //       final data = json.decode(response.body)['data'] as List;
+// //       print('API Response: $data');
+// //
+// //       // Parse the data into a list of Toilet objects
+// //       toiletList.value = data.map((json) => Toilet.fromJson(json)).toList();
+// //       print("Data fetched successfully: ${toiletList.value}");
+// //     } else {
+// //       print('API Error: ${response.statusCode} ${response.reasonPhrase}');
+// //       showErrorSnackbar('Failed to load data');
+// //     }
+// //   } catch (e) {
+// //     showErrorSnackbar('An error occurred');
+// //     print('Exception: $e');
+// //   } finally {
+// //     // Hide loading indicator
+// //     Get.back();  // Remove this if Get.dialog() is not being used
+// //   }
+// // }

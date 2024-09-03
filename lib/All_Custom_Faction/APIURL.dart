@@ -16,6 +16,7 @@ class ApiUrls {
   static const String loginapi = '${MainUrl}signin';
   static const String verifyotpapi = '${MainUrl}verify-otp';
   static const String resendotpapi = '${MainUrl}resend-otp';
+  static const String gettolietapi = '${MainUrl}toilets';
 }
 
 class AllApiFaction extends GetxController {
@@ -131,6 +132,57 @@ class AllApiFaction extends GetxController {
           containerColor: Colors.red);
     }
   }
+
+  Future<void> gettolietdata() async {
+    Get.dialog(
+      lottieAnimation(Get.context!),
+      barrierDismissible: false,
+    );
+
+    try {
+      final String loginUrl = ApiUrls.gettolietapi;
+      final loginResponse = await http.post(
+        Uri.parse(loginUrl),
+      );
+
+      final jsonResponse = jsonDecode(loginResponse.body);
+
+      if (loginResponse.statusCode == 200) {
+        final UserResponse userResponse = UserResponse.fromJson(jsonResponse);
+
+          Get.back();
+         print(jsonResponse);
+
+        if (userResponse.success == true) {
+          final message = userResponse.message!;
+          showSuccessSnackbar(message,
+              icon: Icons.check_circle,
+              iconColor: Colors.green,
+              containerColor: Colors.green);
+
+        } else {
+          final message = userResponse.message!;
+          showSuccessSnackbar(message,
+              icon: Icons.error_outline,
+              iconColor: Colors.red,
+              containerColor: Colors.red);
+        }
+      } else {
+        final message = jsonResponse['message'] ?? 'An error occurred';
+        showSuccessSnackbar(message,
+            icon: Icons.error_outline,
+            iconColor: Colors.red,
+            containerColor: Colors.red);
+      }
+    } catch (e) {
+      Get.back();
+      showSuccessSnackbar('An error occurred while processing your request',
+          icon: Icons.error_outline,
+          iconColor: Colors.red,
+          containerColor: Colors.red);
+    }
+  }
+
 
   Future<void> confirmOtp(String otp, BuildContext context) async {
     final Map<String, dynamic> args = Get.arguments;
