@@ -6,11 +6,8 @@ import '../All_Custom_Faction/Colors.dart';
 import '../All_Custom_Faction/Image.dart';
 import '../All_Custom_Faction/TextStyle.dart';
 import '../Controller/HomeController.dart';
-import '../Controller/NavigationContainer.dart';
 
 class HomePage_Screen extends StatelessWidget {
-  const HomePage_Screen({super.key});
-
   @override
   Widget build(BuildContext context) {
     final HomePageController controller = Get.put(HomePageController());
@@ -47,7 +44,7 @@ class HomePage_Screen extends StatelessWidget {
                   GoogleMap(
                     initialCameraPosition: CameraPosition(
                       target: controller.currentLocation.value,
-                      zoom: 30,
+                      zoom: 18,
                     ),
                     myLocationEnabled: false,
                     tiltGesturesEnabled: true,
@@ -56,10 +53,21 @@ class HomePage_Screen extends StatelessWidget {
                     zoomGesturesEnabled: true,
                     mapToolbarEnabled: false,
                     indoorViewEnabled: true,
-                    // Enable indoor view
+                    circles: {
+                      Circle(
+                        visible: true,
+                        strokeColor: Colors.black,
+                        circleId: const CircleId("1"),
+                        center: controller.currentLocation.value,
+                        // Use the correct location variable
+                        radius: 100,
+                        strokeWidth: 1,
+                        fillColor: AppColors.gradientcolor1.withOpacity(0.2),
+                      ),
+                    },
                     markers: {
                       Marker(
-                        markerId: MarkerId('currentLocation'),
+                        markerId: MarkerId('Devi Lal'),
                         position: controller.currentLocation.value,
                         icon: controller.customIcon1.value ??
                             BitmapDescriptor.defaultMarker,
@@ -88,15 +96,12 @@ class HomePage_Screen extends StatelessWidget {
                     },
                     polylines: controller.polylines,
                   ),
-
-                  // Toggle Visibility Button
-
                   // Navigation Container
                   if (controller.navigationStarted.value)
                     Positioned(
                       top: 0,
                       left: 0,
-                      right: 70,
+                      right: 0,
                       child: Obx(() => Container(
                             padding: EdgeInsets.all(10),
                             decoration: BoxDecoration(
@@ -146,7 +151,6 @@ class HomePage_Screen extends StatelessWidget {
                                 // Wrap button in Visibility widget to control its visibility
                                 Visibility(
                                   visible: controller.isButtonVisible.value,
-                                  // Show or hide button based on visibility state
                                   child: GestureDetector(
                                     onTap: () {
                                       controller
@@ -195,15 +199,71 @@ class HomePage_Screen extends StatelessWidget {
                             ),
                           )),
                     ),
+                  // Additional Popup
+                  if (controller.navigationStarted.value ||
+                      controller.showAdditionalPopup.value)
+                    Positioned(
+                      left: 10,
+                      bottom: 10,
+                      child: GestureDetector(
+                        onTap: () {
+                          controller.toggleAdditionalPopup();
+                        },
+                        child: Container(
+                          height: 50,
+                          width: 50,
+                          padding: EdgeInsets.all(2),
+                          decoration: BoxDecoration(
+                            color: Colors.blue,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Icon(
+                            Icons.qr_code_scanner_outlined,
+                            color: Colors.white,
+                            size: 30,
+                          ),
+                        ),
+                      ),
+                    ),
 
-                  // Search Box Positioned at the top
+                  Positioned(
+                    // top: 300,
+                    left: 10,
+                    right: 100,
+                    bottom: 70,
+                    child: Obx(() => Visibility(
+                          visible: controller.showAdditionalPopup.value,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.3),
+                                  blurRadius: 10,
+                                  offset: Offset(0, 5),
+                                ),
+                              ],
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(10.0),
+                              child: Image.asset(
+                                Images.qrcodeimg,
+                                // Replace with your local image path
+                                fit: BoxFit.fill,
+                              ),
+                            ),
+                          ),
+                        )),
+                  ),
+
                   if (!controller.navigationStarted.value)
                     Positioned(
-                      top: 20,
+                      top: 10,
                       left: 0,
                       right: 0,
                       child: Padding(
-                        padding: const EdgeInsets.all(5),
+                        padding: EdgeInsets.all(5),
                         child: Container(
                           height: 60,
                           decoration: BoxDecoration(
@@ -226,7 +286,6 @@ class HomePage_Screen extends StatelessWidget {
                         ),
                       ),
                     ),
-
                   // Positioned Hotel Information Container
                   Positioned(
                     bottom: 0,
@@ -337,6 +396,7 @@ class HomePage_Screen extends StatelessWidget {
                       },
                       child: Icon(
                         Icons.my_location,
+                        size: 20,
                         color: Colors.white,
                       ),
                     ),

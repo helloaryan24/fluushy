@@ -11,6 +11,7 @@ import '../All_Custom_Faction/Image.dart';
 import '../All_Custom_Faction/Colors.dart';
 import 'package:http/http.dart' as http;
 
+import '../All_Custom_Faction/TextStyle.dart';
 import '../Model/Toiletmodel.dart';
 
 // Define a model class for Toilet
@@ -36,50 +37,21 @@ class HomePageController extends GetxController {
 
   // Add the toiletList variable
   final toiletList = <Toilet>[].obs;
+  var showAdditionalPopup = false.obs;
 
   @override
   void onInit() {
     super.onInit();
     startLocationUpdates();
     loadCustomMarkers();
-    fetchToiletData();
+    // AllApiFaction().fetchToiletData(toiletList);
   }
 
-  Future<void> fetchToiletData() async {
-    final url = ApiUrls.gettolietapi; // Your API URL
-    print('API URL: $url');
-
-    try {
-      // Perform API request
-      final response = await http.get(Uri.parse(url));
-      print('Response Status Code: ${response.statusCode}');
-      if (response.statusCode == 200) {
-        final responseJson = json.decode(response.body);
-        print('API Response: $responseJson');
-
-        // Check if the response has the 'data' key
-        if (responseJson.containsKey('data') && responseJson['data'] is List) {
-          final data = responseJson['data'] as List;
-
-          // Parse the data into a list of Toilet objects
-          toiletList.value = data.map((json) => Toilet.fromJson(json)).toList();
-          print("Data fetched successfully: ${toiletList.value}");
-        } else {
-          print('Invalid API response structure');
-          showErrorSnackbar('Failed to load data');
-        }
-      } else {
-        print('API Error: ${response.statusCode} ${response.reasonPhrase}');
-        showErrorSnackbar('Failed to load data');
-      }
-    } catch (e) {
-      showErrorSnackbar('An error occurred');
-      print('Exception: $e');
-    } finally {
-      // Hide loading indicator
-      Get.back();  // Remove this if Get.dialog() is not being used
-    }
+  void startNavigation() {
+    navigationStarted.value = true;
+    showAdditionalPopup.value = true; // Show the additional popup
   }
+
 
   void loadCustomMarkers() async {
     customIcon.value = await _loadMarkerIcon('assets/wc_icon.png', 30);
@@ -120,8 +92,13 @@ class HomePageController extends GetxController {
     }
   }
 
+  void toggleAdditionalPopup() {
+    showAdditionalPopup.value = !showAdditionalPopup.value;
+  }
+
   void cancelNavigation() {
     navigationStarted.value = false;
+    showAdditionalPopup.value = false; // Hide the additional popup
 
     // Clear any polylines on the map
     polylines.clear();
@@ -147,8 +124,6 @@ class HomePageController extends GetxController {
   }
 
   void addPolyline(LatLng start, LatLng end) async {
-    // polylines.clear();
-    print("HELLO!");
     navigationStarted.value = true;
     List<LatLng> polylinePoints = await getPolylinePoints(start, end);
     polylines.add(Polyline(
@@ -194,6 +169,12 @@ class HomePageController extends GetxController {
                   fit: BoxFit.cover,
                 ),
               ),
+              Image.asset(
+                width: 100,
+                height: 100,
+                Images.qrcodeimg, // Replace with your local image path
+                fit: BoxFit.contain,
+              ),
               SizedBox(height: 15),
               Text(
                 "You have reached your destination.",
@@ -203,6 +184,13 @@ class HomePageController extends GetxController {
                 ),
                 textAlign: TextAlign.center,
               ),
+              SizedBox(height: 10),
+              Text(
+                "Write a review",
+                style: TextStyles.MontserratMedium,
+                textAlign: TextAlign.center,
+              ),
+
             ],
           ),
           actions: [
@@ -248,7 +236,7 @@ class HomePageController extends GetxController {
 
   Future<void> locateMe() async {
     if (await _isLocationServiceEnabled() && await _checkPermissions()) {
-      Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+      Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.bestForNavigation);
       LatLng newLocation = LatLng(position.latitude, position.longitude);
       if (previousLocation != null && selectedHotel.value != null) {
         addPolyline(previousLocation!, newLocation);
@@ -285,7 +273,7 @@ class HomePageController extends GetxController {
 
   void updateNearbyHotels() {
     nearbyHotels.value = [
-      {'name': 'OYO', 'location': LatLng(26.8396903,75.7726729), 'image': Images.googlelogo},
+      {'name': 'OYO 600 INR Full AC Room', 'location': LatLng(26.8536679,75.7593825), 'image': Images.googlelogo},
     ];
     updateMarkersForNearbyHotels();
   }

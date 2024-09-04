@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../Model/Toiletmodel.dart';
 import '../Model/Usermodel.dart';
 import 'All_Widget.dart';
 import 'Image.dart';
@@ -180,6 +181,42 @@ class AllApiFaction extends GetxController {
           icon: Icons.error_outline,
           iconColor: Colors.red,
           containerColor: Colors.red);
+    }
+  }
+
+  Future<void> fetchToiletData(toiletList) async {
+    final url = ApiUrls.gettolietapi; // Your API URL
+    print('API URL: $url');
+
+    try {
+      // Perform API request
+      final response = await http.get(Uri.parse(url));
+      print('Response Status Code: ${response.statusCode}');
+      if (response.statusCode == 200) {
+        final responseJson = json.decode(response.body);
+        print('API Response: $responseJson');
+
+        // Check if the response has the 'data' key
+        if (responseJson.containsKey('data') && responseJson['data'] is List) {
+          final data = responseJson['data'] as List;
+
+          // Parse the data into a list of Toilet objects
+          toiletList.value = data.map((json) => Toilet.fromJson(json)).toList();
+          print("Data fetched successfully: ${toiletList.value}");
+        } else {
+          print('Invalid API response structure');
+          showErrorSnackbar('Failed to load data');
+        }
+      } else {
+        print('API Error: ${response.statusCode} ${response.reasonPhrase}');
+        showErrorSnackbar('Failed to load data');
+      }
+    } catch (e) {
+      showErrorSnackbar('An error occurred');
+      print('Exception: $e');
+    } finally {
+      // Hide loading indicator
+      Get.back();  // Remove this if Get.dialog() is not being used
     }
   }
 
